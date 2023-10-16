@@ -26,8 +26,8 @@ app.get('/api/chat/:id', (req, res) => {
     res.send(singleChat);
 });
 
-app.use(notFound);
-app.use(errorHandler);
+// app.use(notFound);
+// app.use(errorHandler);
 
 app.use('/api/user', userRouter);
 

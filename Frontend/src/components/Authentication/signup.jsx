@@ -9,6 +9,8 @@ import {
 } from '@chakra-ui/react'
 import { Input,InputGroup } from '@chakra-ui/react'
 import { Button, ButtonGroup } from '@chakra-ui/react'
+import axios from 'axios';
+import {useHistory} from 'react-router-dom'
 const signup = () => {
     const [show, setShow] = useState(false);
     const [cShow,setcShow] = useState(false);
@@ -19,9 +21,10 @@ const signup = () => {
     const [pic, setPic] = useState();
     const [loading, setLoading] = useState(false);
     const toast = useToast();
+    const history=useHistory();
     const handleClick = () => setShow(!show);
     const handleClickCf = () => setcShow(!cShow);
-
+    console.log(pic);
     const postDetails = (pics) => {
         setLoading(true);
         if (pics === undefined) {
@@ -38,21 +41,14 @@ const signup = () => {
         if (pics.type === 'image/jpeg' || pics.type === 'image/png') {
             const data = new FormData();
             data.append("file", pics);
-            data.append('upload_preset', 'chatapp');
-            data.append('cloud_name', 'rtca');
+            data.append("upload_preset", "chatapp");
+            data.append("cloud_name", "rtca");
             fetch("https://api.cloudinary.com/v1_1/rtca/image/upload", {
-                method: 'post',
+                method: "post",
                 body: data,
-                mode: 'no-cors',
-                headers: {
-    'Authorization': '738923653429559',
-  },
-            }).then((res) => {
-                console.log(res)
-                res.json()
-            }).then((data) => {
-                console.log(data);
-                setPic(data.url.toString());
+            }).then((res) => res.json() ).then((data) => {
+                console.log(data.secure_url);
+                setPic(data.secure_url.toString());
                 setLoading(false);
             }).catch((err) => {
                 console.log(err);
@@ -73,9 +69,63 @@ const signup = () => {
         }
     };
 
-    const submitHandler = () => {
-        
-    }
+    const submitHandler = async () => {
+        setLoading(true);
+        if (!name || !email || !password || !confirmPassword) {
+            toast({
+                title: 'Please Fill All The Fields',
+                // description: "We've created your account for you.",
+                status: 'warning',
+                duration: 5000,
+                isClosable: true,
+                position: "bottom",
+            });
+            setLoading(false);
+            return;
+        }
+        if (password != confirmPassword) {
+          toast({
+                title: 'Password Do Not Match',
+                // description: "We've created your account for you.",
+                status: 'warning',
+                duration: 5000,
+                isClosable: true,
+                position:"bottom",
+          });
+            setLoading(false);
+            return;
+        }  
+        try {
+            const config = {
+                headers: {
+                    "Content-type": "application/json",
+                },
+            };
+            const { data } = await axios.post('http://localhost:5000/api/user', { name, email, password,pic }, config);
+            toast({
+                title: 'Registration SuccessFul',
+                // description: "We've created your account for you.",
+                status: 'success',
+                duration: 5000,
+                isClosable: true,
+                position:"bottom",
+            });
+            localStorage.setItem("userInfo", JSON.stringify(data));
+            setLoading(false);
+            history.push('/chats');
+        } catch (error) {
+            toast({
+                title: 'Error Occured',
+                // description: "We've created your account for you.",
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+                position:"bottom",
+            });
+            setLoading(false);
+        }
+
+    };
   return (
       <VStack spacing='5px'>
           <FormControl id='first-name' isRequired>
