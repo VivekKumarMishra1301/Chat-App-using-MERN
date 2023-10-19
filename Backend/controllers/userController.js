@@ -47,4 +47,20 @@ const authUser = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { registerUser,authUser };
+
+const allUsers = asyncHandler(async (req,res) => {
+    // Here we are not going to use directly the api we are going to use the querries
+    const keyword = req.query.search ? {
+        $or: [
+            { name: { $regex: req.query.search, $options: "i" } },
+            {email:{$regex:req.query.search,$options:"i"}},
+        ]
+    }
+        : {}
+    const users= await User.find(keyword).find({ _id: { $ne: req.user._id } });
+    res.send(users);
+    // console.log(keyword)
+});
+
+
+module.exports = { registerUser,authUser,allUsers };

@@ -11,8 +11,8 @@ function App() {
     
       <div className='App'>
         <Route path='/' component={Home} exact/>
-         <Route path='/chat' component={Chat}/>
-        <Button colorScheme='blue'>Button</Button>
+         <Route path='/chats' component={Chat}/>
+        
       </div>
     
   )
