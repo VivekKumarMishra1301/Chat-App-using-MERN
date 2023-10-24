@@ -8,5 +8,5 @@ const messageModel = mongoose.Schema({
         timestamps: true,
     }
 );
-const messages = mongoose.model("Message", messageModel);
-module.exports=messages;
+const Message = mongoose.model("Message", messageModel);
+module.exports=Message;
