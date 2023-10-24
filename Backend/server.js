@@ -6,6 +6,7 @@ const connectDB = require('./dbConnect/db.js');
 const userRouter = require('./routes/userRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware')
 const chatRoutes=require('./routes/chatRoutes')
+const messageRoutes = require('./routes/messageRoutes');
 dotenv.config();
 connectDB();
 
@@ -32,6 +33,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/user', userRouter);
 app.use('/api/chat', chatRoutes);
+app.use('/api/messages', messageRoutes);
 
 const PORT = process.env.PORT || 5000;
 

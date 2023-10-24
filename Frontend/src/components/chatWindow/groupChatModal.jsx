@@ -103,6 +103,7 @@ const groupChatModal = ({ children }) => {
         if (selectedUsers.includes(userToAdd)) {
             toast({
                 title: "User Already Added",
+                
                 status: 'warning',
                 duration: 5000,
                 isClosable: true,
