@@ -73,7 +73,9 @@ const createChatGroup = asyncHandler(async (req, res) => {
     }
     var users = JSON.parse(req.body.users);
     users.push(req.user);
-    if (users.length < 2) {
+    if (users.length < 2)
+    
+    {
         console.log('gr')
         return res.status(400).send("More than 2 Users required to form a group chat");
     }
