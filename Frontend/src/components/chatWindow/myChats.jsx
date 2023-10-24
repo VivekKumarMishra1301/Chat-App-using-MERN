@@ -10,11 +10,11 @@ import { Text } from '@chakra-ui/react'
 import { Stack, HStack, VStack } from '@chakra-ui/react'
 import GroupChatModal from './groupChatModal';
 import axios from 'axios';
-const myChats = () => {
+const myChats = ({fetchAgain}) => {
   const [loggedUser, setLoggedUSer] = useState();
   const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
   const toast = useToast();
-  const fetchChats = async () => {
+  const fetchChats = async () => {  
     try {
       const config = {
         headers: {
@@ -38,7 +38,7 @@ const myChats = () => {
   useEffect(() => {
     setLoggedUSer(JSON.parse(localStorage.getItem('userInfo')));
     fetchChats();
-  },[])
+  },[fetchAgain])
   return (
     <Box
       display={{base:selectedChat?"none":"flex",md:"flex"}}
