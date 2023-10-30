@@ -16,46 +16,91 @@ import {
 import axios from 'axios';
 import { useToast } from '@chakra-ui/react'
 import ScrollableChat from './scrollableChat'
-const singleChat = ({fetchAgain,setFetchAgain}) => {
+import io from 'socket.io-client'
+import Lottie from 'react-lottie';
+const ENDPOINT = 'http://localhost:5000'
+var socket, selectedChatCompare;
+import animationData from '../animations/typing.json'
+const singleChat = ({ fetchAgain, setFetchAgain }) => {
   const { user, selectedChat, setSelectedChat } = ChatState();
   const [message, setMessage] = useState([]);
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
+  const [typing, setTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  
+
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+    rendererSettings: {
+      preserveAspectRatio:'xMidYMid slice'
+    },
+}
+
+
   const toast = useToast();
-console.log(message);
-  const fetchMessage = async() => {
+  const [socketConnected, setSocketConnected] = useState(false);
+  // console.log(message);
+  useEffect(() => {
+    fetchMessage();
+    selectedChatCompare = selectedChat;
+  }, [selectedChat]);
+  const fetchMessage = async () => {
     if (!selectedChat)
       return;
     try {
       const config = {
-          headers: {
+        headers: {
             
-            Authorization: `Bearer ${user.token}`,
-          },
+          Authorization: `Bearer ${user.token}`,
+        },
       };
       setLoading(true);
       const { data } = await axios.get(`http://localhost:5000/api/messages/${selectedChat._id}`, config);
       console.log(message);
       setMessage(data);
       setLoading(false);
+      socket.emit('join chat', selectedChat._id);
     } catch (error) {
       toast({
-                title: 'Error Occurred',
-                description: error.message,
-                status: 'error',
-                duration: 2000,
-                isClosable: true,
-                position: 'bottom',
-            });
+        title: 'Error Occurred',
+        description: error.message,
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+        position: 'bottom',
+      });
     }
 
-}
+  }
+
   useEffect(() => {
-    fetchMessage();
-  }, [selectedChat]);
+    socket = io(ENDPOINT);
+    socket.emit('setup', user);
+    socket.on('connected', () => setSocketConnected(true));
+    socket.on('typing', () => setIsTyping(true));
+    socket.on('stop typing',()=> setIsTyping(false));
+  }, [])
+  
+  useEffect(() => {
+    socket.on('message recieved', (newMessageRecieved) => {
+      console.log('new Message Recieved ')
+      if (
+        !selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
+        // give notification
+      } else {
+        setMessage([...message, newMessageRecieved]);
+      }
+      
+    });
+});
+
 
   const sendMessage = async(event) => {
     if (event.key === 'Enter' && newMessage) {
+      socket.emit('stop typing', selectedChat._id);
       try {
         const config = {
           headers: {
@@ -66,9 +111,11 @@ console.log(message);
         setNewMessage('');
         const { data } = await axios.post('http://localhost:5000/api/messages',{
           content: newMessage,
-          chatId: selectedChat._id,
+          chatId: selectedChat,
         }, config);
-        console.log(data)
+        console.log("data")
+        console.log(data);
+        socket.emit('new message', data);
         setMessage([...message, data]);
       } catch (error) {
         toast({
@@ -84,8 +131,21 @@ console.log(message);
   }
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
-    // Typing Indicator Logic
-
+    if (!socketConnected) return;
+    if (!typing) {
+      setTyping(true);
+      socket.emit('typing', selectedChat._id);
+    }
+    let lastTypingTime = new Date().getTime();
+    var timerLength = 3000;
+    setTimeout(() => {
+      var timeNow = new Date().getTime();
+      var timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit('stop typing', selectedChat._id);
+        setTyping(false);
+      }
+    },timerLength)
   }
 
 
@@ -133,7 +193,7 @@ console.log(message);
             w='100%'
             h='100%'
             borderRadius='lg'
-            overFlowY='hidden'
+            overflowY='hidden'
           >
             {loading ? (
               <Spinner
@@ -151,6 +211,14 @@ console.log(message);
 
 
             <FormControl onKeyDown={sendMessage} isRequired mt={3}>
+              {isTyping ? <div>
+                <Lottie
+                  options={defaultOptions}
+                  width={70}
+                  style={{marginBottom:15,marginLeft:0}}
+                ></Lottie>
+
+              </div>:(<></>)}
               <Input
                 variant='filled'
                 bg='#E0E0E0'

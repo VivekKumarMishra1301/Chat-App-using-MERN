@@ -138,7 +138,7 @@ const groupChatModal = ({ children }) => {
                    >
                        <FormControl>
                            <Input
-                               placeholder='Add Users eg: Vivek Mishra'
+                               placeholder='Enter Group Name'
                                mb={1}
                                onChange={(e)=>setGroupChatName(e.target.value)}
 
@@ -146,7 +146,7 @@ const groupChatModal = ({ children }) => {
                        </FormControl>
                        <FormControl>
                            <Input
-                               placeholder='Chat Name'
+                               placeholder='Add Users Eg. Vivek'
                                mb={3}
                                onChange={(e)=>handleSearch(e.target.value)}
 
