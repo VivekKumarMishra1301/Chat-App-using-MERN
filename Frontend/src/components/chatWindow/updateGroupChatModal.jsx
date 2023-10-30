@@ -22,7 +22,7 @@ import {
 import axios from 'axios'
 import UserListItem from './userList'
 
-const updateGroupChatModal = ({fetchAgain,setFetchAgain}) => {
+const updateGroupChatModal = ({fetchAgain,setFetchAgain,fetchMessage}) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { user, setSelectedChat, chats, setChats,selectedChat } = ChatState();
     const [search, setSearch] = useState('');
@@ -57,6 +57,7 @@ const updateGroupChatModal = ({fetchAgain,setFetchAgain}) => {
             }, config);
             user1._id===user._id?setSelectedChat():setSelectedChat(data);
             setFetchAgain(!fetchAgain);
+            fetchMessage();
             setLoading(false);
         } catch (error) {
             toast({
