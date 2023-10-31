@@ -40,3 +40,8 @@
   overflow-x: scroll;
   /* scrollbar-width: none; */
 }
+.notify{
+  background-color:red;
+  color:white;
+  border-radius:20px;
+}

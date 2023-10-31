@@ -22,7 +22,7 @@ const ENDPOINT = 'http://localhost:5000'
 var socket, selectedChatCompare;
 import animationData from '../animations/typing.json'
 const singleChat = ({ fetchAgain, setFetchAgain }) => {
-  const { user, selectedChat, setSelectedChat } = ChatState();
+  const { user, selectedChat, setSelectedChat,notification,setNotification } = ChatState();
   const [message, setMessage] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
@@ -90,6 +90,11 @@ const singleChat = ({ fetchAgain, setFetchAgain }) => {
       if (
         !selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
         // give notification
+        if (!notification.includes(newMessageRecieved)) {
+          setNotification([newMessageRecieved, ...notification]);
+          setFetchAgain(!fetchAgain);
+          
+        }
       } else {
         setMessage([...message, newMessageRecieved]);
       }
