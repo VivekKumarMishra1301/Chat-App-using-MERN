@@ -3,6 +3,8 @@ import { Box, Tooltip } from '@chakra-ui/react'
 import { Button, ButtonGroup,Text } from '@chakra-ui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import Badge from '@material-ui/core/Badge';
+// import { MDBBadge, MDBIcon } from 'mdb-react-ui-kit';
 import {
   Menu,
   MenuButton,
@@ -33,12 +35,15 @@ import axios from 'axios';
 import ChatLoading from './ChatLoading'
 import UserListItem from './userList'
 import { Spinner } from '@chakra-ui/react'
+import { getSender } from '../chatConfig/chatLogics';
+import NotificationBadge from 'react-notification-badge';
+import {Effect} from 'react-notification-badge';
 const sideDrawer = () => {
     const [search, setSearch] = useState('');
     const [searchResult, setSearchResult] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingChat, setLoadingChat] = useState();
-    const { user,setSelectedChat,chats,setChats } = ChatState();
+    const { user,setSelectedChat,chats,setChats,notification,setNotification } = ChatState();
     const history = useHistory();
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -135,9 +140,41 @@ const sideDrawer = () => {
               <div>
                   <Menu>
                       <MenuButton p={1}>
-                          <BellIcon></BellIcon>
+                          {/* <NotificationBadge
+                              count={notification.length}
+                              effect={Effect.SCALE}
+                          /> */}
+                          {/* <Badge
+                            badgeContent={notification.length}
+                            color="info"
+                            size="large"
+                            /> */}
+                          <div
+                          className='notification'>
+                              
+                              <BellIcon></BellIcon>
+                              {notification.length?(<span className="badge"
+                                  style={{ backgroundColor: 'red', color: 'white', borderRadius:'50%' }}
+
+                              >{notification.length}</span>):<></>}
+                              
+                          
+                          </div>
                       </MenuButton>
-                      {/* <MenuList></MenuList> */}
+                      <MenuList pl={3}>
+                          {!notification.length && 'No New Messages'}
+                          {notification.map((notif) => (
+                              <MenuItem key={notif._id}
+                                  onClick={() => {
+                                      setSelectedChat(notif.chat);
+                                      setNotification(notification.filter((n)=>n!==notif))
+                                  }}
+                              >
+                                  {notif.chat.isGroupChat?`New Message in ${notif.chat.chatName}`:`New Message from ${getSender(user,notif.chat.users)}`}
+
+                              </MenuItem>
+                          ))}
+                      </MenuList>
                   </Menu>
                   <Menu>
                       <MenuButton
