@@ -15,8 +15,8 @@ const login = () => {
   const [show, setShow] = useState(false);
     
     
-    const [email, setEmail] = useState();
-    const [password, setPassword] = useState();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     
     const [loading, setLoading] = useState(false);
     const toast = useToast();
@@ -49,13 +49,14 @@ const login = () => {
                 title: 'Now You Are Logged In',
                 // description: "We've created your account for you.",
                 status: 'success',
-                duration: 5000,
+                duration: 2000,
                 isClosable: true,
                 position:"bottom",
             });
             localStorage.setItem("userInfo", JSON.stringify(data));
             setLoading(false);
             history.push('/chats');
+            window.location.href = '/chats';
         } catch (error) {
             toast({
                 title: 'Error Occured!',
