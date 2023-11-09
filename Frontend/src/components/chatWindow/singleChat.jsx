@@ -48,6 +48,7 @@ const singleChat = ({ fetchAgain, setFetchAgain }) => {
     selectedChatCompare = selectedChat;
   }, [selectedChat]);
   const fetchMessage = async () => {
+    console.log('singlechat' + user.token);
     if (!selectedChat)
       return;
     try {
@@ -59,7 +60,7 @@ const singleChat = ({ fetchAgain, setFetchAgain }) => {
       };
       setLoading(true);
       const { data } = await axios.get(`http://localhost:5000/api/messages/${selectedChat._id}`, config);
-      console.log(message);
+      // console.log(message);
       setMessage(data);
       setLoading(false);
       socket.emit('join chat', selectedChat._id);
@@ -91,7 +92,20 @@ const singleChat = ({ fetchAgain, setFetchAgain }) => {
         !selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
         // give notification
         if (!notification.includes(newMessageRecieved)) {
-          setNotification([newMessageRecieved, ...notification]);
+          console.log(newMessageRecieved);
+          const toFind = newMessageRecieved.sender._id;
+                    let flag = true;
+                    for (let j = 0; j < notification.length; j++){
+                        const toCheck = notification[j].sender._id;
+                      if (toFind === toCheck) {
+                        flag = false;
+                        break;
+                        }
+                    }
+                    if (flag) {
+                        notification.push(newMessageRecieved);
+                    }
+          setNotification(notification);
           setFetchAgain(!fetchAgain);
           
         }
@@ -127,7 +141,7 @@ const singleChat = ({ fetchAgain, setFetchAgain }) => {
                 title: 'Error in Sending Messages',
                 description: error.message,
                 status: 'error',
-                duration: 2000,
+                duration: 2000, 
                 isClosable: true,
                 position: 'bottom-left',
             });
