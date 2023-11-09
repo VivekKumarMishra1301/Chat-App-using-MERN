@@ -4,7 +4,7 @@ const User = require('../Models/user.js');
 const accessChat = asyncHandler(async (req, res) => {
 
     const { userId } = req.body;
-    console.log(userId);
+    // console.log(userId);
     if (!userId) {
         console.log("UserId param not sent with request");
         return res.sendStatus(400);
@@ -146,6 +146,7 @@ const removeFromGroup = asyncHandler(async (req, res) => {
         })
         .populate("users", "-password")
         .populate('groupAdmin', "-password");
+    // console.log(removed);
     if (!removed) {
         res.status(404);
         throw new Error("Chat Not Found");

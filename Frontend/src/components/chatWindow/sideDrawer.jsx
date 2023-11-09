@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState,useEffect} from 'react'
 import { Box, Tooltip } from '@chakra-ui/react'
 import { Button, ButtonGroup,Text } from '@chakra-ui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -38,6 +38,7 @@ import { Spinner } from '@chakra-ui/react'
 import { getSender } from '../chatConfig/chatLogics';
 import NotificationBadge from 'react-notification-badge';
 import {Effect} from 'react-notification-badge';
+// import { useToast } from '@chakra-ui/react'
 const sideDrawer = () => {
     const [search, setSearch] = useState('');
     const [searchResult, setSearchResult] = useState([]);
@@ -69,7 +70,7 @@ const sideDrawer = () => {
             setLoading(true);
             const config = {
                 headers: {
-                    Authorization: `Bearer ${user.token}`
+                    Authorization: `Bearer ${user.token}`,
                 },
             };
             const { data } = await axios.get(`http://localhost:5000/api/user?search=${search}`, config);
@@ -89,7 +90,8 @@ const sideDrawer = () => {
         }
     }
 
-    const accessChat = async(userId) => {
+    const accessChat = async (userId) => {
+        // console.log('chat' + user.token);
         try {
             setLoadingChat(true);
             const config = {
@@ -113,6 +115,88 @@ const sideDrawer = () => {
             });
         }
     }
+    const getNotifications = async (user1) => {
+        console.log('sidedrawer'+user1.token);
+        
+            try {
+                // console.log(chat[i]._id);
+                const config = {
+                headers: {
+                    Authorization: `Bearer ${user1.token}`
+                },
+                };
+                console.log('sider' + config.headers.Authorization);
+                const { data } = await axios.get(`http://localhost:5000/api/notifications/${user1._id}`, config);
+                console.log(data);
+                for (let i = 0; i < data.length; i++){
+                    const toFind = data[i].sender._id;
+                    let flag = true;
+                    for (let j = 0; j < notification.length; j++){
+                        const toCheck = notification[j].sender._id;
+                        if (toFind === toCheck&&(data[i].chat.isGroupChat===false)) {
+                             const { data1 } = await axios.post('http://localhost:5000/api/notifications/notifremove',{
+                                    chatId: data[i]._id,
+                                    userId:user._id,
+                                }, config);
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        notification.push(data[i]);
+                    }
+            //         else {
+            //             const { data1 } = await axios.post('http://localhost:5000/api/notifications/notifremove',{
+            //     chatId: data[i]._id,
+            //     userId:user._id,
+            // }, config);
+            //         }
+
+                }
+                setNotification(notification);
+            } catch (error) {
+                toast({
+                title: 'Error fetching the Notifications',
+                description: error.message,
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+                position: 'bottom-left',
+            });
+            }
+        
+    }
+    const removeNotifications = async (notifId) => {
+        console.log('removing');
+        try {
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${user.token}`
+                },
+            };
+            const { data } = await axios.post('http://localhost:5000/api/notifications/notifremove',{
+                chatId: notifId,
+                userId:user._id,
+            }, config);
+        } catch (error) {
+            toast({
+                title: 'Error removing notification',
+                description: error.message,
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+                position: 'bottom-left',
+            });
+        }
+    }
+    useEffect(() => {
+        // console.log('user');
+        // console.log(user)
+        // console.log(chats); 
+        getNotifications(user);
+    },[])
+
+
   return (
       <>
           <Box className='Side-Bar'
@@ -150,7 +234,7 @@ const sideDrawer = () => {
                             size="large"
                             /> */}
                           <div
-                          className='notification'>
+                          className=''>
                               
                               <BellIcon></BellIcon>
                               {notification.length?(<span className="badge"
@@ -167,7 +251,8 @@ const sideDrawer = () => {
                               <MenuItem key={notif._id}
                                   onClick={() => {
                                       setSelectedChat(notif.chat);
-                                      setNotification(notification.filter((n)=>n!==notif))
+                                      removeNotifications(notif._id);
+                                      setNotification(notification.filter((n) => n !== notif))
                                   }}
                               >
                                   {notif.chat.isGroupChat?`New Message in ${notif.chat.chatName}`:`New Message from ${getSender(user,notif.chat.users)}`}

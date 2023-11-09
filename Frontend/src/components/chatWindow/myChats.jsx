@@ -14,6 +14,7 @@ const myChats = ({fetchAgain}) => {
   const [loggedUser, setLoggedUSer] = useState();
   const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
   const toast = useToast();
+  // console.log(chats);
   const fetchChats = async () => {  
     try {
       const config = {
